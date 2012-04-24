@@ -150,15 +150,13 @@ public class CometServletClientTest extends Thread {
 		while ((this.max--) > 0) {
 			//sleep(this.delay);
 			time = System.currentTimeMillis();
-			System.out.println("Write to server #" + n);
 			writechunk(os, "Testing...");
-			System.out.println("Read from server #" + (n++));
 			response = readchunk(in);
 			if (response == null) {
 				// Reach the end of the stream
 				break;
 			}
-			System.out.println("Server Response -> " + response);
+
 			time = System.currentTimeMillis() - time;
 			// update the maximum response time
 			if (time > max_time) {
