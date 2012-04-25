@@ -175,7 +175,6 @@ public class CometServletClientTest extends Thread {
         long time = 0;
         String response = null;
         int counter = 0;
-        long total = System.currentTimeMillis();
         int min_count = 10 * 1000 / delay;
         int max_count = 50 * 1000 / delay;
         while ((this.max--) > 0) {
@@ -204,8 +203,7 @@ public class CometServletClientTest extends Thread {
             }
             counter++;
         }
-        total = System.currentTimeMillis() - total;
-        System.out.println("Total execution time: " + total);
+
         avg_time /= (max_count - min_count + 1);
         // For each thread print out the maximum, minimum and average response
         // times
