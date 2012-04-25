@@ -26,6 +26,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * {@code CometServletClientTest}
@@ -65,7 +66,6 @@ public class CometServletClientTest extends Thread {
      */
     public CometServletClientTest(URL url, int d_max, int delay) throws Exception {
         this.url = url;
-        // this.max = 55 * 1000 / delay;
         this.max = d_max;
         this.delay = delay;
     }
@@ -73,11 +73,32 @@ public class CometServletClientTest extends Thread {
     /**
      * Create a new instance of {@code CometServletClientTest}
      *
-     * @param max the maximum number of requests
-     * @throws Exception
+     * @param url
+     * @param delay
      */
-    public CometServletClientTest(int max) throws Exception {
-        this(new URL(DEFAULT_URL), max, DEFAULT_DELAY);
+    public CometServletClientTest(URL url, int delay) {
+        this(delay);
+        this.url = url;
+    }
+
+    /**
+     * Create a new instance of {@code CometServletClientTest}
+     *
+     * @param delay
+     */
+    public CometServletClientTest(int delay) {
+        this(60 * 1000 / delay, delay);
+    }
+
+    /**
+     * Create a new instance of {@code CometServletClientTest}
+     *
+     * @param d_max
+     * @param delay
+     */
+    public CometServletClientTest(int d_max, int delay) {
+        this.max = d_max;
+        this.delay = delay;
     }
 
     /**
@@ -142,9 +163,10 @@ public class CometServletClientTest extends Thread {
 
         InputStream is = this.socket.getInputStream();
         BufferedReader in = new BufferedReader(new InputStreamReader(is));
-
         String line = null;
-        while ((line = in.readLine()) != null && !line.matches("\\s*")) {
+        Pattern pattern = Pattern.compile("\\s*");
+
+        while ((line = in.readLine()) != null && !pattern.matcher(line).matches()) {
             System.out.println(line);
         }
         System.out.println(line);
@@ -337,7 +359,7 @@ public class CometServletClientTest extends Thread {
         }
 
         URL strURL = new URL(args[0]);
-        int max = 1000, delay = DEFAULT_DELAY;
+        int delay = DEFAULT_DELAY;
 
         if (args.length > 1) {
             try {
@@ -368,7 +390,7 @@ public class CometServletClientTest extends Thread {
 
         Thread clients[] = new Thread[NB_CLIENTS];
         for (int i = 0; i < clients.length; i++) {
-            clients[i] = new CometServletClientTest(strURL, max, delay);
+            clients[i] = new CometServletClientTest(strURL, delay);
         }
         for (int i = 0; i < clients.length; i++) {
             clients[i].start();
