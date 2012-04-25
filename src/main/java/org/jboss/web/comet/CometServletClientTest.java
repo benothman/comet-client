@@ -108,10 +108,8 @@ public class CometServletClientTest extends Thread {
     protected void connect() throws Exception {
         // Open connection with server
         sleep(new Random().nextInt(5 * NB_CLIENTS));
-        System.out.println("Connecting to server on " + this.url.getHost() + ":" + this.url.getPort());
         this.socket = new Socket(this.url.getHost(), this.url.getPort());
         this.socket.setSoTimeout(10000);
-        System.out.println("Connection to server established ...");
         connections.incrementAndGet();
     }
 
@@ -177,7 +175,7 @@ public class CometServletClientTest extends Thread {
         long time = 0;
         String response = null;
         int counter = 0;
-
+        long total = System.currentTimeMillis();
         int min_count = 10 * 1000 / delay;
         int max_count = 50 * 1000 / delay;
         while ((this.max--) > 0) {
@@ -206,7 +204,8 @@ public class CometServletClientTest extends Thread {
             }
             counter++;
         }
-
+        total = System.currentTimeMillis() - total;
+        System.out.println("Total execution time: " + total);
         avg_time /= (max_count - min_count + 1);
         // For each thread print out the maximum, minimum and average response
         // times
