@@ -101,7 +101,6 @@ public class LogParser {
         br.close();
 
         // sort lists
-        System.out.println("Sorting collections");
         Collections.sort(max_times);
         Collections.sort(min_times);
         Collections.sort(avg_times);
@@ -109,7 +108,6 @@ public class LogParser {
         double avg = 0;
 
         int toRemove = 12 * counter / 100;
-        System.out.println("Filter collections");
         for (int i = 0; i < toRemove; i++) {
             max_times.removeFirst();
             max_times.removeLast();
@@ -145,8 +143,8 @@ public class LogParser {
         fw.close();
 
         // Print out the average max, min and avg
-        System.err.println("AVG MAX: " + avg_times.getLast() + " ms\n");
-        System.err.println("AVG MIN: " + avg_times.getFirst() + " ms\n");
+        System.err.println("\n\nAVG MAX: " + avg_times.getLast() + " ms");
+        System.err.println("AVG MIN: " + avg_times.getFirst() + " ms");
         System.err.println("AVG AVG: " + avg + " ms\n");
     }
 
