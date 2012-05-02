@@ -145,7 +145,7 @@ public class LogParser {
         // Print out the average max, min and avg
         System.err.println("\n\nAVG MAX: " + avg_times.getLast() + " ms");
         System.err.println("AVG MIN: " + avg_times.getFirst() + " ms");
-        System.err.println("AVG AVG: " + avg + " ms\n");
+        System.err.println("AVG AVG: " + avg + " ms\n\n");
     }
 
     /**
