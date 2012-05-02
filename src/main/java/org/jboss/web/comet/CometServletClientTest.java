@@ -177,9 +177,13 @@ public class CometServletClientTest extends Thread {
         int counter = 0;
         int min_count = 10 * 1000 / delay;
         int max_count = 50 * 1000 / delay;
+
+        int n = 0;
+
         while ((this.max--) > 0) {
             sleep(this.delay);
             time = System.currentTimeMillis();
+            System.out.println("Sending packet #" + (++n));
             writechunk(os, "Testing...");
             response = readchunk(in);
             time = System.currentTimeMillis() - time;
@@ -187,7 +191,7 @@ public class CometServletClientTest extends Thread {
                 // Reach the end of the stream
                 break;
             }
-
+            System.out.println("Server Response: " + response);
             // update the average response time
             if (counter >= min_count && counter <= max_count) {
                 // update the maximum response time
