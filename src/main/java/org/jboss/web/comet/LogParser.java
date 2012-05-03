@@ -19,10 +19,10 @@
  */
 package org.jboss.web.comet;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.util.Collections;
 import java.util.LinkedList;
 
@@ -142,6 +142,24 @@ public class LogParser {
         fw.flush();
         fw.close();
 
+        // ---------------------------
+        String homeDir = System.getProperty("user.home");
+        File file = new File(homeDir + File.separatorChar + "stats.txt");
+        FileChannel channel = new RandomAccessFile(file, "rw").getChannel();
+        FileLock lock = channel.lock();
+
+        try {
+            channel.tryLock();
+            ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
+            buffer.put((avg + "\n").getBytes()).flip();
+            long pos = channel.size();
+            channel.write(buffer, pos);
+        } catch (Exception exp) {
+            System.err.println("Exception: " + exp.getMessage());
+        } finally {
+            lock.release();
+        }
+        channel.close();
         // Print out the average max, min and avg
         System.err.println("\n\nAVG MAX: " + avg_times.getLast() + " ms");
         System.err.println("AVG MIN: " + avg_times.getFirst() + " ms");
