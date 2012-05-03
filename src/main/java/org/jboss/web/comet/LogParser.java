@@ -146,10 +146,10 @@ public class LogParser {
         String homeDir = System.getProperty("user.home");
         File file = new File(homeDir + File.separatorChar + "stats.txt");
         FileChannel channel = new RandomAccessFile(file, "rw").getChannel();
-        FileLock lock = channel.lock();
+        FileLock lock = null;
 
         try {
-            channel.tryLock();
+            lock = channel.lock();
             ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
             buffer.put((avg + "\n").getBytes()).flip();
             long pos = channel.size();
