@@ -155,7 +155,7 @@ public class LogParser {
             long pos = channel.size();
             channel.write(buffer, pos);
         } catch (Exception exp) {
-            System.err.println("Exception: " + exp.getMessage());
+            exp.printStackTrace();
         } finally {
             lock.release();
         }
