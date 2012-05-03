@@ -56,6 +56,7 @@ public class StatCalculator {
         while ((line = br.readLine()) != null) {
             tmp = Double.parseDouble(line.trim());
             some += tmp;
+            counter++;
         }
         br.close();
         System.out.println("\n\n\tAverage value: " + (some / counter) + "\n\n");
