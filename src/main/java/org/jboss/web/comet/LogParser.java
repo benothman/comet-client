@@ -147,7 +147,7 @@ public class LogParser {
         File file = new File(homeDir + File.separatorChar + "stats.txt");
         FileChannel channel = new RandomAccessFile(file, "rw").getChannel();
         FileLock lock = null;
-
+        
         try {
             lock = channel.lock();
             ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
