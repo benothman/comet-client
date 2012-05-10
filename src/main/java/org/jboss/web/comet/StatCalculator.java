@@ -20,9 +20,7 @@
  */
 package org.jboss.web.comet;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -75,12 +73,17 @@ public class StatCalculator {
         }
         br.close();
 
+        FileWriter fw = new FileWriter(new File(args[0] + "_cal.txt"));
         Set<Integer> keys = stats.keySet();
         Pair p = null;
+
         for (int key : keys) {
             p = stats.get(key);
             System.out.println("  " + key + " \t " + p.getAvg());
+            fw.write(key + " \t " + p.getAvg() + "\n");
         }
+
+        fw.close();
     }
 
     private static class Pair {
