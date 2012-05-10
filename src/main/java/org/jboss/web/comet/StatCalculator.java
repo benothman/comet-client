@@ -21,8 +21,10 @@
 package org.jboss.web.comet;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.List;
 
 /**
  * {@code StatCalculator}
@@ -74,7 +76,9 @@ public class StatCalculator {
         br.close();
 
         FileWriter fw = new FileWriter(new File(args[0] + "_cal.txt"));
-        Set<Integer> keys = stats.keySet();
+        List<Integer> keys = new ArrayList<Integer>(stats.keySet());
+        // Sorting keys in ascending order
+        Collections.sort(keys);
         Pair p = null;
 
         for (int key : keys) {
@@ -99,18 +103,5 @@ public class StatCalculator {
             sum += value;
             counter++;
         }
-    }
-
-    /**
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     */
-    private static class Tuple<A, B, C> {
-
-        protected A first;
-        protected B second;
-        protected C third;
     }
 }
