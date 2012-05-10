@@ -23,6 +23,8 @@ package org.jboss.web.comet;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Set;
 
 /**
  * {@code StatCalculator}
@@ -41,6 +43,11 @@ public class StatCalculator {
         super();
     }
 
+    /**
+     *
+     * @param args
+     * @throws Exception
+     */
     public static void main(String args[]) throws Exception {
         if (args.length < 1) {
             System.err.println("Usage: java " + StatCalculator.class.getName() + " path");
@@ -48,17 +55,59 @@ public class StatCalculator {
         }
 
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(args[0])));
-
+        HashMap<Integer, Pair> stats = new HashMap<Integer, Pair>();
         String line = null;
-        double some = 0, tmp = 0;
-        int counter = 0;
 
         while ((line = br.readLine()) != null) {
-            tmp = Double.parseDouble(line.trim());
-            some += tmp;
-            counter++;
+            if ("".equals(line.trim())) {
+                continue;
+            }
+
+            String tab[] = line.split("\\s+");
+            int key = Integer.parseInt(tab[0]);
+            double value = Double.parseDouble(tab[1]);
+            if (stats.get(key) == null) {
+                stats.put(key, new Pair());
+            }
+
+            Pair p = stats.get(key);
+            p.add(value);
         }
         br.close();
-        System.out.println("\n\n\tAverage value: " + (some / counter) + "\n\n");
+
+        Set<Integer> keys = stats.keySet();
+        Pair p = null;
+        for (int key : keys) {
+            p = stats.get(key);
+            System.out.println("  " + key + " \t " + p.getAvg());
+        }
+    }
+
+    private static class Pair {
+
+        private int counter = 0;
+        private double sum = 0;
+
+        double getAvg() {
+            return sum / counter;
+        }
+
+        void add(double value) {
+            sum += value;
+            counter++;
+        }
+    }
+
+    /**
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     */
+    private static class Tuple<A, B, C> {
+
+        protected A first;
+        protected B second;
+        protected C third;
     }
 }

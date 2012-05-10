@@ -47,7 +47,7 @@ public class LogParser {
      * @param filename
      * @throws Exception
      */
-    public static void parse(String filename) throws Exception {
+    public static void parse(String filename, int n) throws Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
         String line = null;
         // drop the header line
@@ -147,11 +147,11 @@ public class LogParser {
         File file = new File(homeDir + File.separatorChar + "stats.txt");
         FileChannel channel = new RandomAccessFile(file, "rw").getChannel();
         FileLock lock = null;
-        
+
         try {
             lock = channel.lock();
             ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
-            buffer.put((avg + "\n").getBytes()).flip();
+            buffer.put((n + "\t" + avg + "\n").getBytes()).flip();
             long pos = channel.size();
             channel.write(buffer, pos);
         } catch (Exception exp) {
@@ -172,11 +172,21 @@ public class LogParser {
      * @throws Exception
      */
     public static void main(String args[]) throws Exception {
-        if (args.length < 1) {
-            System.err.println("Usage: java " + LogParser.class.getName() + " filename");
+        if (args.length < 2) {
+            System.err.println("Usage: java " + LogParser.class.getName() + " filename n");
+            System.err.println("filename: the path of the file to be parsed");
+            System.err.println("n: the total number of requests to be considered");
             System.exit(1);
         }
 
-        parse(args[0]);
+        int n = 0;
+        try {
+            n = Integer.parseInt(args[1]);
+        } catch (NumberFormatException nfe) {
+            System.err.println("ERROR: " + nfe.getMessage());
+            System.exit(-1);
+        }
+
+        parse(args[0], n);
     }
 }
