@@ -80,11 +80,11 @@ public class StatCalculator {
         Collections.sort(keys);
         Pair p = null;
         fw.write("Req/Sec \t AVG\n");
-        System.out.println("\n Req/Sec \t Samples \t AVG");
+        System.out.println("\nReq/Sec\tSamples\tAVG");
         for (int key : keys) {
             p = stats.get(key);
-            System.out.println(" " + key + " \t " + p.counter + " \t " + p.getAvg());
-            fw.write(key + "  \t  " + " \t" + p.counter +" \t " +p.getAvg() + "\n");
+            System.out.println(key + "\t" + p.samples() + "\t" + p.getAvg());
+            fw.write(key + "  \t  " + " \t" + p.samples() + " \t " + p.getAvg() + "\n");
         }
         fw.flush();
         fw.close();
@@ -92,7 +92,7 @@ public class StatCalculator {
     }
 
     /**
-     * 
+     *
      */
     private static class Pair {
 
@@ -101,6 +101,10 @@ public class StatCalculator {
 
         double getAvg() {
             return sum / counter;
+        }
+
+        int samples() {
+            return counter;
         }
 
         void add(double value) {
