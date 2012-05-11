@@ -79,12 +79,12 @@ public class StatCalculator {
         // Sorting keys in ascending order
         Collections.sort(keys);
         Pair p = null;
-        fw.write("Req/Sec \t AVG\n");
+        fw.write("Req/Sec\tSamples\tAVG\n");
         System.out.println("\nReq/Sec\tSamples\tAVG");
         for (int key : keys) {
             p = stats.get(key);
             System.out.println(key + "\t" + p.samples() + "\t" + p.getAvg());
-            fw.write(key + "  \t  " + " \t" + p.samples() + " \t " + p.getAvg() + "\n");
+            fw.write(key + "\t" + p.samples() + "\t" + p.getAvg() + "\n");
         }
         fw.flush();
         fw.close();
