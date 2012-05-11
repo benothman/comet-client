@@ -80,7 +80,7 @@ public class StatCalculator {
         Collections.sort(keys);
         Pair p = null;
         fw.write("Req/Sec \t AVG\n");
-        System.out.println("\nReq/Sec \t AVG");
+        System.out.println("\n Req/Sec \t AVG");
         for (int key : keys) {
             p = stats.get(key);
             System.out.println(" " + key + " \t " + p.getAvg());
