@@ -84,7 +84,7 @@ public class StatCalculator {
         for (int key : keys) {
             p = stats.get(key);
             System.out.println(" " + key + " \t " + p.getAvg());
-            fw.write(key + " \t " + p.getAvg() + "\n");
+            fw.write(key + "  \t  " + p.getAvg() + "\n");
         }
         fw.flush();
         fw.close();
