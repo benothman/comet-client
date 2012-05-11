@@ -83,7 +83,7 @@ public class StatCalculator {
         System.out.println("\n Req/Sec \t Samples \t AVG");
         for (int key : keys) {
             p = stats.get(key);
-            System.out.println(" " + key + " \tSamples " + " \t " + p.getAvg());
+            System.out.println(" " + key + " \t " + p.counter + " \t " + p.getAvg());
             fw.write(key + "  \t  " + " \t" + p.counter +" \t " +p.getAvg() + "\n");
         }
         fw.flush();
