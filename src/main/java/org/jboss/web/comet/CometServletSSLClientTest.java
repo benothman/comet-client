@@ -178,7 +178,7 @@ public class CometServletSSLClientTest extends CometServletClientTest {
 
         Thread clients[] = new Thread[NB_CLIENTS];
         for (int i = 0; i < clients.length; i++) {
-            clients[i] = new CometServletClientTest(strURL, delay);
+            clients[i] = new CometServletSSLClientTest(strURL, delay);
         }
         for (int i = 0; i < clients.length; i++) {
             clients[i].start();
