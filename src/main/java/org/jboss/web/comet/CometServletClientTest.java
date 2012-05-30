@@ -48,8 +48,6 @@ public class CometServletClientTest extends Thread {
     private long max_time = Long.MIN_VALUE;
     private long min_time = Long.MAX_VALUE;
     private double avg_time = 0;
-    // private Exception ex = null;
-    // boolean failed = false;
     private Socket socket;
     protected URL url;
     private int max;
