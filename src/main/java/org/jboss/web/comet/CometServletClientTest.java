@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 public class CometServletClientTest extends Thread {
 
     public static final String DEFAULT_URL = "http://localhost:8080/comet/CometServletTest";
-    private static final AtomicInteger connections = new AtomicInteger(0);
+    protected static final AtomicInteger connections = new AtomicInteger(0);
     public static final String CRLF = "\r\n";
     public static final int MAX = 1000;
     protected static int NB_CLIENTS = 100;

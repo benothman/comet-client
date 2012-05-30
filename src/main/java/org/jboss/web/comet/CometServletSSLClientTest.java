@@ -114,6 +114,7 @@ public class CometServletSSLClientTest extends CometServletClientTest {
             SSLSocket socket = (SSLSocket) socketFactory.createSocket(this.url.getHost(), this.url.getPort());
             socket.setSoTimeout(60000);
             setSocket(socket);
+            connections.incrementAndGet();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
