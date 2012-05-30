@@ -111,11 +111,11 @@ public class CometServletSSLClientTest extends CometServletClientTest {
             SSLSocketFactory socketFactory = sslCtx.getSocketFactory();
             Thread.sleep(new Random().nextInt(5 * NB_CLIENTS));
             // Open connection with server
-            System.out.println("Connecting to server at : " + this.url);
+            System.out.println(getClass().getName() + " -> Connecting to server at : " + this.url);
             SSLSocket socket = (SSLSocket) socketFactory.createSocket(this.url.getHost(), this.url.getPort());
             socket.setSoTimeout(10000);
             setSocket(socket);
-            System.out.println("Connection established ...");
+            System.out.println(getClass().getName() + " -> Connection established ...");
             connections.incrementAndGet();
         } catch (Exception ex) {
             ex.printStackTrace();

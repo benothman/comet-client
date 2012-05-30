@@ -106,9 +106,11 @@ public class CometServletClientTest extends Thread {
     protected void connect() throws Exception {
         // Open connection with server
         sleep(new Random().nextInt(5 * NB_CLIENTS));
+        System.out.println(getClass().getName() + " -> Connecting to server at : " + this.url);
         this.socket = new Socket(this.url.getHost(), this.url.getPort());
         this.socket.setSoTimeout(10000);
         connections.incrementAndGet();
+        System.out.println(getClass().getName() + " -> Connection established ...");
     }
 
     /**
