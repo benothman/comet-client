@@ -42,7 +42,7 @@ public class CometServletClientTest extends Thread {
     private static final AtomicInteger connections = new AtomicInteger(0);
     public static final String CRLF = "\r\n";
     public static final int MAX = 1000;
-    private static int NB_CLIENTS = 100;
+    protected static int NB_CLIENTS = 100;
     public static final int N_THREADS = 100;
     public static final int DEFAULT_DELAY = 1000; // default wait delay 1000ms
     private long max_time = Long.MIN_VALUE;
@@ -51,7 +51,7 @@ public class CometServletClientTest extends Thread {
     // private Exception ex = null;
     // boolean failed = false;
     private Socket socket;
-    private URL url;
+    protected URL url;
     private int max;
     private int delay;
     private String lastPartialSess = null;
@@ -111,6 +111,14 @@ public class CometServletClientTest extends Thread {
         this.socket = new Socket(this.url.getHost(), this.url.getPort());
         this.socket.setSoTimeout(10000);
         connections.incrementAndGet();
+    }
+
+    /**
+     *
+     * @param socket
+     */
+    protected void setSocket(Socket socket) {
+        this.socket = socket;
     }
 
     @Override
