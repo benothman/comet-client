@@ -112,7 +112,7 @@ public class CometServletSSLClientTest extends CometServletClientTest {
             Thread.sleep(new Random().nextInt(5 * NB_CLIENTS));
             // Open connection with server
             SSLSocket socket = (SSLSocket) socketFactory.createSocket(this.url.getHost(), this.url.getPort());
-            socket.setSoTimeout(60000);
+            socket.setSoTimeout(10000);
             setSocket(socket);
             connections.incrementAndGet();
         } catch (Exception ex) {
