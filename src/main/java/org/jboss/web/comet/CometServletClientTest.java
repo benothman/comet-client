@@ -285,7 +285,7 @@ public class CometServletClientTest extends Thread {
         while (len == -1) {
             try {
                 data = in.readLine();
-                System.out.println("DATA (len): " + data);
+                System.out.println("Chunk size: " + data);
                 len = Integer.valueOf(data, 16);
             } catch (NumberFormatException ex) {
 
@@ -308,11 +308,11 @@ public class CometServletClientTest extends Thread {
         while (recv != len) {
             int i = in.read(buf, offset, len - offset);
             recv += i;
-            // System.out.println("DATA: " + recv + ":" + len);
             offset = recv;
         }
         data = new String(buf);
-        System.out.println("DATA: " + recv + " : " + data);
+        System.out.println("Received : " + recv);
+        System.out.println("DATA -> " + data);
         
         return data;
     }
