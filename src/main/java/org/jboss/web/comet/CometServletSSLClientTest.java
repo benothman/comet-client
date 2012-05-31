@@ -172,7 +172,7 @@ public class CometServletSSLClientTest extends CometServletClientTest {
         System.setProperty("javax.net.ssl.trustStore", home + "cacerts.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
         System.setProperty("javax.net.ssl.keyStore", home + ".keystore");
-        System.setProperty("javax.net.ssl.keyStorePassword", "changeit");
+        System.setProperty("javax.net.ssl.keyStorePassword", "bismillah");
 
         Thread clients[] = new Thread[NB_CLIENTS];
         for (int i = 0; i < clients.length; i++) {
