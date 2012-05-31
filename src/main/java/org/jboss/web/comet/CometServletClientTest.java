@@ -312,8 +312,8 @@ public class CometServletClientTest extends Thread {
             offset = recv;
         }
         data = new String(buf);
-        // System.out.println("DATA: " + recv + " : " + data);
-        System.out.println("DATA: " + recv);
+        System.out.println("DATA: " + recv + " : " + data);
+        
         return data;
     }
 
