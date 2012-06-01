@@ -41,6 +41,7 @@ public class CometServletClientTest extends Thread {
     public static final String DEFAULT_URL = "http://localhost:8080/comet/CometServletTest";
     protected static final AtomicInteger connections = new AtomicInteger(0);
     public static final String CRLF = "\r\n";
+    public static final String LF = "\n";
     public static final int MAX = 1000;
     protected static int NB_CLIENTS = 100;
     public static final int N_THREADS = 100;
@@ -187,7 +188,7 @@ public class CometServletClientTest extends Thread {
         while ((this.max--) > 0) {
             sleep(this.delay);
             time = System.currentTimeMillis();
-            writechunk(os, "Testing...");
+            writechunk(os, "Testing ...");
             response = readchunk(in);
             time = System.currentTimeMillis() - time;
             if (response == null) {
@@ -268,7 +269,9 @@ public class CometServletClientTest extends Thread {
      */
     protected static void writechunk(OutputStream os, String data) throws Exception {
         String chunkSize = Integer.toHexString(data.length());
-        os.write((chunkSize + CRLF + data + CRLF).getBytes());
+        os.write((chunkSize + CRLF).getBytes());
+        os.flush();
+        os.write((data + CRLF).getBytes());
         os.flush();
     }
 
@@ -285,14 +288,13 @@ public class CometServletClientTest extends Thread {
         while (len == -1) {
             try {
                 data = in.readLine();
-                System.out.println("Chunk size: " + data);
+                //System.out.println("Chunk size: " + data);
                 len = Integer.valueOf(data, 16);
             } catch (NumberFormatException ex) {
 
                 break;
             } catch (Exception ex) {
                 System.err.println("Ex: " + ex.getMessage());
-                ex.printStackTrace();
             } finally {
                 if (len == 0) {
                     System.out.println("End chunk");
@@ -311,9 +313,9 @@ public class CometServletClientTest extends Thread {
             offset = recv;
         }
         data = new String(buf);
-        System.out.println("Received : " + recv);
-        System.out.println("DATA -> " + data);
-        
+        //System.out.println("Received : " + recv);
+        //System.out.println("DATA -> " + data);
+
         return data;
     }
 

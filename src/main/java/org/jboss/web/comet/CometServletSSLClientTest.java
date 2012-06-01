@@ -23,6 +23,7 @@ package org.jboss.web.comet;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.KeyStore;
 import java.util.Random;
@@ -168,11 +169,18 @@ public class CometServletSSLClientTest extends CometServletClientTest {
         //System.out.println("\tmax: " + max);
         System.out.println("\tdelay: " + delay);
 
+        
+        
+        
+        InputStream in = CometServletSSLClientTest.class.getResourceAsStream("");
+        
+        
+        
         String home = System.getProperty("user.home") + File.separatorChar;
         System.setProperty("javax.net.ssl.trustStore", home + "cacerts.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
         System.setProperty("javax.net.ssl.keyStore", home + ".keystore");
-        System.setProperty("javax.net.ssl.keyStorePassword", "bismillah");
+        System.setProperty("javax.net.ssl.keyStorePassword", "changeit");
 
         Thread clients[] = new Thread[NB_CLIENTS];
         for (int i = 0; i < clients.length; i++) {
