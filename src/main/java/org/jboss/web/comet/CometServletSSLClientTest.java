@@ -21,7 +21,6 @@
  */
 package org.jboss.web.comet;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
@@ -168,19 +167,15 @@ public class CometServletSSLClientTest extends CometServletClientTest {
         System.out.println("\tn: " + NB_CLIENTS);
         //System.out.println("\tmax: " + max);
         System.out.println("\tdelay: " + delay);
-
         
+        InputStream in = CometServletSSLClientTest.class.getResourceAsStream("ssl-config.properties");                
+        System.getProperties().load(in);
         
-        
-        InputStream in = CometServletSSLClientTest.class.getResourceAsStream("");
-        
-        
-        
-        String home = System.getProperty("user.home") + File.separatorChar;
-        System.setProperty("javax.net.ssl.trustStore", home + "cacerts.jks");
-        System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
-        System.setProperty("javax.net.ssl.keyStore", home + ".keystore");
-        System.setProperty("javax.net.ssl.keyStorePassword", "bismillah");
+        String home = System.getProperty("user.home");
+        String trustStoreFileName = System.getProperty("javax.net.ssl.trustStore").replace("~", home);
+        System.setProperty("javax.net.ssl.trustStore", trustStoreFileName);
+        String keyStoreFileName = System.getProperty("javax.net.ssl.keyStore").replace("~", home);
+        System.setProperty("javax.net.ssl.keyStore", keyStoreFileName);
 
         Thread clients[] = new Thread[NB_CLIENTS];
         for (int i = 0; i < clients.length; i++) {
