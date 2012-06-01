@@ -269,9 +269,7 @@ public class CometServletClientTest extends Thread {
      */
     protected static void writechunk(OutputStream os, String data) throws Exception {
         String chunkSize = Integer.toHexString(data.length());
-        os.write((chunkSize + CRLF).getBytes());
-        os.flush();
-        os.write((data + CRLF).getBytes());
+        os.write((chunkSize + CRLF + data + CRLF).getBytes());
         os.flush();
     }
 
