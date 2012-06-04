@@ -55,6 +55,7 @@ public class CometServletClientTest extends Thread {
     private int max;
     private int delay;
     private String lastPartialSess = null;
+    ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
 
     /**
      * Create a new instance of {@code CometServletClientTest}
@@ -161,6 +162,7 @@ public class CometServletClientTest extends Thread {
      */
     public void runit() throws Exception {
         OutputStream os = this.socket.getOutputStream();
+
         os.write(("POST " + this.url.getPath() + " HTTP/1.1\n").getBytes());
         os.write(("User-Agent: " + CometServletClientTest.class.getName() + " (chunked-test)\n").getBytes());
         os.write(("Host: " + this.url.getHost() + "\n").getBytes());
@@ -190,7 +192,7 @@ public class CometServletClientTest extends Thread {
         while ((this.max--) > 0) {
             sleep(this.delay);
             time = System.currentTimeMillis();
-            writechunk(os, "Testing ...");
+            writechunk(baos,os, "Testing ...");
             response = readchunk(in);
             time = System.currentTimeMillis() - time;
             if (response == null) {
@@ -214,7 +216,7 @@ public class CometServletClientTest extends Thread {
             counter++;
         }
         // End up communication
-        writechunk(os, "");
+        writechunk(baos,os, "");
         avg_time /= (max_count - min_count + 1);
         // For each thread print out the maximum, minimum and average response
         // times
@@ -270,9 +272,10 @@ public class CometServletClientTest extends Thread {
      * @param data
      * @throws Exception
      */
-    protected static void writechunk(OutputStream os, String data) throws Exception {
+    protected static void writechunk(ByteArrayOutputStream baos, OutputStream os, String data) throws Exception {
         String chunkSize = Integer.toHexString(data.length());
-        os.write((chunkSize + CRLF + data + CRLF).getBytes());
+        baos.write((chunkSize + CRLF + data + CRLF).getBytes());
+        baos.writeTo(os);
         os.flush();
     }
 
