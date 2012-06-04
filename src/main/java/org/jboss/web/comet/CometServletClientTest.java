@@ -23,6 +23,7 @@ package org.jboss.web.comet;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.URL;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -107,8 +108,7 @@ public class CometServletClientTest extends Thread {
     protected void connect() throws Exception {
         // Open connection with server
         sleep(new Random().nextInt(5 * NB_CLIENTS));
-        this.socket = new Socket(this.url.getHost(), this.url.getPort());
-        this.socket.setSoTimeout(10000);
+        setSocket(new Socket(this.url.getHost(), this.url.getPort()));
         connections.incrementAndGet();
     }
 
@@ -116,8 +116,10 @@ public class CometServletClientTest extends Thread {
      *
      * @param socket
      */
-    protected void setSocket(Socket socket) {
+    protected void setSocket(Socket socket) throws SocketException {
         this.socket = socket;
+        socket.setSoTimeout(10000);
+        this.socket.setTcpNoDelay(true);
     }
 
     @Override
