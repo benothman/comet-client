@@ -213,7 +213,8 @@ public class CometServletClientTest extends Thread {
             }
             counter++;
         }
-
+        // End up communication
+        writechunk(os, "");
         avg_time /= (max_count - min_count + 1);
         // For each thread print out the maximum, minimum and average response
         // times
