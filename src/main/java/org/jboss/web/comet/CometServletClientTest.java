@@ -215,8 +215,7 @@ public class CometServletClientTest extends Thread {
             }
             counter++;
         }
-        // End up communication
-        writechunk(baos,os, "");
+        
         avg_time /= (max_count - min_count + 1);
         // For each thread print out the maximum, minimum and average response
         // times
@@ -292,7 +291,7 @@ public class CometServletClientTest extends Thread {
         while (len == -1) {
             try {
                 data = in.readLine();
-                System.out.println("Chunk size: " + data);
+                //System.out.println("Chunk size: " + data);
                 len = Integer.valueOf(data, 16);
             } catch (NumberFormatException ex) {
 
@@ -301,7 +300,7 @@ public class CometServletClientTest extends Thread {
                 System.err.println("Ex: " + ex.getMessage());
             } finally {
                 if (len == 0) {
-                    System.out.println("End chunk");
+                    //System.out.println("End chunk");
                     throw new Exception("End chunk");
                 }
             }
@@ -318,7 +317,7 @@ public class CometServletClientTest extends Thread {
         }
         data = new String(buf);
         //System.out.println("Received : " + recv);
-        System.out.println("DATA -> " + data);
+        //System.out.println("DATA -> " + data);
 
         return data;
     }
