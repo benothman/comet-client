@@ -134,6 +134,8 @@ public class CometServletClientTest extends Thread {
             // wait for 2 seconds until all threads are ready
             sleep(DEFAULT_DELAY);
             runit();
+            int n = connections.decrementAndGet();
+            System.out.println("connections = " + n);
         } catch (Exception exp) {
             System.err.println("Exception: " + exp.getMessage());
             exp.printStackTrace();
