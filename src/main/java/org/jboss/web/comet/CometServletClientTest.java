@@ -120,7 +120,7 @@ public class CometServletClientTest extends Thread {
     protected void setSocket(Socket socket) throws SocketException {
         this.socket = socket;
         socket.setSoTimeout(10000);
-        this.socket.setTcpNoDelay(true);
+        //this.socket.setTcpNoDelay(true);
     }
 
     @Override
