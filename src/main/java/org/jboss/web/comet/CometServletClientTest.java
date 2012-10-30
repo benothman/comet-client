@@ -393,7 +393,7 @@ public class CometServletClientTest extends Thread {
 		}
 
 		URL strURL = new URL(args[0]);
-		int delay = DEFAULT_DELAY, nReq = DEFAULT_NREQ, nClients;
+		int delay = DEFAULT_DELAY, nReq = DEFAULT_NREQ, nClients = NB_CLIENTS;
 
 		if (args.length > 1) {
 			try {
@@ -439,9 +439,11 @@ public class CometServletClientTest extends Thread {
 		// System.out.println("\tmax: " + max);
 		System.out.println("\tdelay: " + delay);
 
+		int x = nReq / nClients;
+		
 		Thread clients[] = new Thread[NB_CLIENTS];
 		for (int i = 0; i < clients.length; i++) {
-			clients[i] = new CometServletClientTest(strURL, delay);
+			clients[i] = new CometServletClientTest(strURL,x, delay);
 		}
 		for (int i = 0; i < clients.length; i++) {
 			clients[i].start();
