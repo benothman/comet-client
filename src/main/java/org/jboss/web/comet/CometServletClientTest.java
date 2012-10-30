@@ -172,9 +172,10 @@ public class CometServletClientTest extends Thread {
 	 * @throws Exception
 	 */
 	private void sendHeader(OutputStream os) throws Exception {
-		String httpQuery = "POST " + this.url.getPath() + " HTTP/1.1\n" + "User-Agent: "
-				+ CometServletClientTest.class.getName() + " (chunked-test)\n" + "Host: "
-				+ this.url.getHost() + "\n" + "Transfer-Encoding: chunked\n\n";
+		String httpQuery = "POST " + this.url.getPath() + " HTTP/1.1\n" 
+				+ "User-Agent: " + CometServletClientTest.class.getName() + " (chunked-test)\n" 
+				+ "Host: " + this.url.getHost() + "\n" 
+				+ "Transfer-Encoding: chunked\n\n";
 		os.write(httpQuery.getBytes());
 		os.flush();
 	}
@@ -438,12 +439,14 @@ public class CometServletClientTest extends Thread {
 		System.out.println("\tn: " + NB_CLIENTS);
 		// System.out.println("\tmax: " + max);
 		System.out.println("\tdelay: " + delay);
+		System.out.println("\tnReq: " + nReq);
+		System.out.println("\tnClients: " + nClients);
 
 		int x = nReq / nClients;
-		
+
 		Thread clients[] = new Thread[NB_CLIENTS];
 		for (int i = 0; i < clients.length; i++) {
-			clients[i] = new CometServletClientTest(strURL,x, delay);
+			clients[i] = new CometServletClientTest(strURL, x, delay);
 		}
 		for (int i = 0; i < clients.length; i++) {
 			clients[i].start();
