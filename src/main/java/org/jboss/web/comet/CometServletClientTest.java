@@ -21,10 +21,15 @@
  */
 package org.jboss.web.comet;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -32,381 +37,417 @@ import java.util.regex.Pattern;
 /**
  * {@code CometServletClientTest}
  * <p/>
- *
+ * 
  * Created on Oct 12, 2011 at 4:46:13 PM
- *
+ * 
  * @author <a href="mailto:nbenothm@redhat.com">Nabil Benothman</a>
  */
 public class CometServletClientTest extends Thread {
 
-    public static final String DEFAULT_URL = "http://localhost:8080/comet/CometServletTest";
-    protected static final AtomicInteger connections = new AtomicInteger(0);
-    public static final String CRLF = "\r\n";
-    public static final String LF = "\n";
-    public static final int MAX = 1000;
-    protected static int NB_CLIENTS = 100;
-    public static final int N_THREADS = 100;
-    public static final int DEFAULT_DELAY = 1000; // default wait delay 1000ms
-    private long max_time = Long.MIN_VALUE;
-    private long min_time = Long.MAX_VALUE;
-    private double avg_time = 0;
-    private Socket socket;
-    protected URL url;
-    private int max;
-    private int delay;
-    private String lastPartialSess = null;
-    ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+	public static final String DEFAULT_URL = "http://localhost:8080/comet/CometServletTest";
+	protected static final AtomicInteger connections = new AtomicInteger(0);
+	public static final String CRLF = "\r\n";
+	public static final String LF = "\n";
+	public static final int MAX = 1000;
+	protected static int NB_CLIENTS = 100;
+	public static final int N_THREADS = 100;
+	public static final int DEFAULT_DELAY = 1000; // default wait delay 1000ms
+	public static final int DEFAULT_NREQ = 1000000; // default wait delay 1000ms
 
-    /**
-     * Create a new instance of {@code CometServletClientTest}
-     *
-     * @param url the service URL
-     * @param d_max the maximum number of requests
-     * @param delay
-     * @throws Exception if the URL is MalFormed
-     */
-    public CometServletClientTest(URL url, int d_max, int delay) throws Exception {
-        this.url = url;
-        this.max = d_max;
-        this.delay = delay;
-    }
+	// private long max_time = Long.MIN_VALUE;
+	// private long min_time = Long.MAX_VALUE;
+	// private double avg_time = 0;
+	private Socket socket;
+	protected URL url;
+	private int max;
+	private int delay;
+	private String lastPartialSess = null;
+	private List<Long> times = new ArrayList<Long>();
 
-    /**
-     * Create a new instance of {@code CometServletClientTest}
-     *
-     * @param url
-     * @param delay
-     */
-    public CometServletClientTest(URL url, int delay) {
-        this(delay);
-        this.url = url;
-    }
+	/**
+	 * Create a new instance of {@code CometServletClientTest}
+	 * 
+	 * @param url
+	 *            the service URL
+	 * @param d_max
+	 *            the maximum number of requests
+	 * @param delay
+	 * @throws Exception
+	 *             if the URL is MalFormed
+	 */
+	public CometServletClientTest(URL url, int d_max, int delay) throws Exception {
+		this.url = url;
+		this.max = d_max;
+		this.delay = delay;
+	}
 
-    /**
-     * Create a new instance of {@code CometServletClientTest}
-     *
-     * @param delay
-     */
-    public CometServletClientTest(int delay) {
-        this(60 * 1000 / delay, delay);
-    }
+	/**
+	 * Create a new instance of {@code CometServletClientTest}
+	 * 
+	 * @param url
+	 * @param delay
+	 */
+	public CometServletClientTest(URL url, int delay) {
+		this(delay);
+		this.url = url;
+	}
 
-    /**
-     * Create a new instance of {@code CometServletClientTest}
-     *
-     * @param d_max
-     * @param delay
-     */
-    public CometServletClientTest(int d_max, int delay) {
-        this.max = d_max;
-        this.delay = delay;
-    }
+	/**
+	 * Create a new instance of {@code CometServletClientTest}
+	 * 
+	 * @param delay
+	 */
+	public CometServletClientTest(int delay) {
+		this(60 * 1000 / delay, delay);
+	}
 
-    /**
-     *
-     * @throws Exception
-     */
-    protected void connect() throws Exception {
-        // Open connection with server
-        sleep(new Random().nextInt(5 * NB_CLIENTS));
-        setSocket(new Socket(this.url.getHost(), this.url.getPort()));
-        connections.incrementAndGet();
-    }
+	/**
+	 * Create a new instance of {@code CometServletClientTest}
+	 * 
+	 * @param d_max
+	 * @param delay
+	 */
+	public CometServletClientTest(int d_max, int delay) {
+		this.max = d_max;
+		this.delay = delay;
+	}
 
-    /**
-     *
-     * @param socket
-     */
-    protected void setSocket(Socket socket) throws SocketException {
-        this.socket = socket;
-        socket.setSoTimeout(60000);
-    }
+	/**
+	 * 
+	 * @throws Exception
+	 */
+	protected void connect() throws Exception {
+		// Open connection with server
+		sleep(new Random().nextInt(5 * NB_CLIENTS));
+		setSocket(new Socket(this.url.getHost(), this.url.getPort()));
+		connections.incrementAndGet();
+	}
 
-    @Override
-    public void run() {
-        try {
-            // Connect to the server
-            this.connect();
-            while (connections.get() < NB_CLIENTS) {
-                // wait until all clients connects
-                sleep(100);
-            }
-            // wait for 2 seconds until all threads are ready
-            sleep(DEFAULT_DELAY);
-            runit();
-            int n = connections.decrementAndGet();
-            System.out.println("connections = " + n);
-        } catch (Exception exp) {
-            System.err.println("Exception: " + exp.getMessage());
-            exp.printStackTrace();
-        } finally {
-            try {
-                this.socket.close();
-            } catch (IOException ioex) {
-                System.err.println("Exception: " + ioex.getMessage());
-                ioex.printStackTrace();
-            }
-        }
-    }
+	/**
+	 * 
+	 * @param socket
+	 */
+	protected void setSocket(Socket socket) throws SocketException {
+		this.socket = socket;
+		socket.setSoTimeout(60000);
+	}
 
-    /**
-     *
-     * @throws IOException
-     */
-    public void close() throws IOException {
-        this.socket.close();
-    }
+	@Override
+	public void run() {
+		try {
+			// Connect to the server
+			this.connect();
+			while (connections.get() < NB_CLIENTS) {
+				// wait until all clients connects
+				sleep(100);
+			}
+			// wait for 2 seconds until all threads are ready
+			sleep(DEFAULT_DELAY);
+			runit();
+			connections.decrementAndGet();
+		} catch (Exception exp) {
+			System.err.println("Exception: " + exp.getMessage());
+			exp.printStackTrace();
+		} finally {
+			try {
+				this.socket.close();
+			} catch (IOException ioex) {
+				System.err.println("Exception: " + ioex.getMessage());
+				ioex.printStackTrace();
+			}
+		}
+	}
 
-    /**
-     *
-     * @throws Exception
-     */
-    public void runit() throws Exception {
-        OutputStream os = this.socket.getOutputStream();
+	/**
+	 * 
+	 * @throws IOException
+	 */
+	public void close() throws IOException {
+		this.socket.close();
+	}
 
-        os.write(("POST " + this.url.getPath() + " HTTP/1.1\n").getBytes());
-        os.write(("User-Agent: " + CometServletClientTest.class.getName() + " (chunked-test)\n").getBytes());
-        os.write(("Host: " + this.url.getHost() + "\n").getBytes());
-        os.write("Transfer-Encoding: chunked\n".getBytes());
-        os.write("\n".getBytes());
-        os.flush();
+	/**
+	 * 
+	 * @param os
+	 * @throws Exception
+	 */
+	private void sendHeader(OutputStream os) throws Exception {
+		String httpQuery = "POST " + this.url.getPath() + " HTTP/1.1\n" + "User-Agent: "
+				+ CometServletClientTest.class.getName() + " (chunked-test)\n" + "Host: "
+				+ this.url.getHost() + "\n" + "Transfer-Encoding: chunked\n\n";
+		os.write(httpQuery.getBytes());
+		os.flush();
+	}
 
-        InputStream is = this.socket.getInputStream();
-        BufferedReader in = new BufferedReader(new InputStreamReader(is));
-        String line = null;
-        Pattern pattern = Pattern.compile("\\s*");
+	/**
+	 * 
+	 * @throws Exception
+	 */
+	public void runit() throws Exception {
+		OutputStream os = this.socket.getOutputStream();
+		// Send the HTTP request Header
+		sendHeader(os);
 
-        while ((line = in.readLine()) != null && !pattern.matcher(line).matches()) {
-            System.out.println(line);
-        }
-        System.out.println(line);
+		BufferedReader in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+		String line = null;
+		Pattern pattern = Pattern.compile("\\s*");
 
-        // Wait a delay to ensure that all threads are ready
-        Random random = new Random();
-        sleep(DEFAULT_DELAY + random.nextInt(1000));
-        long time = 0;
-        String response = null;
-        int counter = 0;
-        int min_count = 10 * 1000 / delay;
-        int max_count = 50 * 1000 / delay;
+		while ((line = in.readLine()) != null && !pattern.matcher(line).matches()) {
+			// System.out.println(line);
+		}
+		// System.out.println(line);
 
-        while ((this.max--) > 0) {
-            sleep(this.delay);
-            time = System.currentTimeMillis();
-            writechunk(baos,os, "Testing ...");
-            response = readchunk(in);
-            time = System.currentTimeMillis() - time;
-            if (response == null) {
-                // Reach the end of the stream
-                break;
-            }
-            //System.out.println("Server Response: " + response);
-            // update the average response time
-            if (counter >= min_count && counter <= max_count) {
-                // update the maximum response time
-                if (time > max_time) {
-                    max_time = time;
-                }
-                // update the minimum response time
-                if (time < min_time) {
-                    min_time = time;
-                }
+		// Wait a delay to ensure that all threads are ready
+		Random random = new Random();
+		sleep(DEFAULT_DELAY + random.nextInt(1000));
+		long time = 0;
+		String response = null;
+		// int counter = 0, min_count = 10 * 1000 / delay, max_count = 50 * 1000
+		// / delay;
 
-                avg_time += time;
-            }
-            counter++;
-        }
-        
-        avg_time /= (max_count - min_count + 1);
-        // For each thread print out the maximum, minimum and average response
-        // times
-        System.out.println(max_time + " \t " + min_time + " \t " + avg_time);
-    }
+		while ((this.max--) > 0) {
+			sleep(this.delay);
+			time = System.currentTimeMillis();
+			writechunk(os, "Testing ...");
+			response = readchunk(in);
+			// System.out.println("From Server -> " + response);
+			time = System.currentTimeMillis() - time;
+			times.add(time);
+			if (response == null) {
+				// Reach the end of the stream
+				break;
+			}
+			// System.out.println("Server Response: " + response);
+			// update the average response time
+			/*
+			 * if (counter >= min_count && counter <= max_count) {
+			 * // update the maximum response time
+			 * if (time > max_time) {
+			 * max_time = time;
+			 * }
+			 * // update the minimum response time
+			 * if (time < min_time) {
+			 * min_time = time;
+			 * }
+			 * 
+			 * avg_time += time;
+			 * }
+			 * counter++;
+			 */
+		}
 
-    /**
-     *
-     * @param input
-     * @return
-     */
-    public String readsess(String input) {
+		// avg_time /= (max_count - min_count + 1);
+		// For each thread print out the maximum, minimum and average response
+		// times
+		// System.out.println(max_time + " \t " + min_time + " \t " + avg_time);
+		for (long t : times) {
+			System.out.println(t);
+		}
+	}
 
-        System.out.println("Read Session -> input: " + input);
+	/**
+	 * 
+	 * @param input
+	 * @return
+	 */
+	public String readsess(String input) {
 
-        String data = null;
-        String in = input;
+		System.out.println("Read Session -> input: " + input);
 
-        data = getsess(in);
-        if (data == null) {
-            /*
-             * A small chunk without a complete sessionid
-             */
-            if (this.lastPartialSess == null) {
-                this.lastPartialSess = input;
-            } else {
-                this.lastPartialSess += input;
-            }
-            in = this.lastPartialSess;
-            data = getsess(in);
-        }
-        /*
-         * Store the last part of session (for the next "small" chunk)
-         */
-        if (data != null) {
-            int start = in.lastIndexOf("[" + data + "]");
-            if (start >= 0) {
-                this.lastPartialSess = in.substring(start);
-            } else {
-                this.lastPartialSess = null;
-            }
-        }
-        if (data == null) {
-            System.out.println("SESSION not found in: " + in);
-        }
-        return data;
-    }
+		String data = null;
+		String in = input;
 
-    /**
-     * Write a chunk to the output stream
-     *
-     * @param os
-     * @param data
-     * @throws Exception
-     */
-    protected static void writechunk(ByteArrayOutputStream baos, OutputStream os, String data) throws Exception {
-        String chunkSize = Integer.toHexString(data.length());
-        baos.write((chunkSize + CRLF + data + CRLF).getBytes());
-        baos.writeTo(os);
-        os.flush();
-    }
+		data = getsess(in);
+		if (data == null) {
+			/*
+			 * A small chunk without a complete sessionid
+			 */
+			if (this.lastPartialSess == null) {
+				this.lastPartialSess = input;
+			} else {
+				this.lastPartialSess += input;
+			}
+			in = this.lastPartialSess;
+			data = getsess(in);
+		}
+		/*
+		 * Store the last part of session (for the next "small" chunk)
+		 */
+		if (data != null) {
+			int start = in.lastIndexOf("[" + data + "]");
+			if (start >= 0) {
+				this.lastPartialSess = in.substring(start);
+			} else {
+				this.lastPartialSess = null;
+			}
+		}
+		if (data == null) {
+			System.out.println("SESSION not found in: " + in);
+		}
+		return data;
+	}
 
-    /**
-     * Read a chunk and return it as a String
-     *
-     * @param in
-     * @return
-     * @throws Exception
-     */
-    protected static String readchunk(BufferedReader in) throws Exception {
-        String data = null;
-        int len = -1;
-        while (len == -1) {
-            try {
-                data = in.readLine();
-                //System.out.println("Chunk size: " + data);
-                len = Integer.valueOf(data, 16);
-            } catch (NumberFormatException ex) {
+	/**
+	 * Write a chunk to the output stream
+	 * 
+	 * @param os
+	 * @param data
+	 * @throws Exception
+	 */
+	protected static void writechunk(OutputStream os, String data) throws Exception {
+		String chunkSize = Integer.toHexString(data.length());
+		os.write((chunkSize + CRLF + data + CRLF).getBytes());
+		os.flush();
+	}
 
-                break;
-            } catch (Exception ex) {
-                System.err.println("Ex: " + ex.getMessage());
-            } finally {
-                if (len == 0) {
-                    //System.out.println("End chunk");
-                    throw new Exception("End chunk");
-                }
-            }
-        }
+	/**
+	 * Read a chunk and return it as a String
+	 * 
+	 * @param in
+	 * @return
+	 * @throws Exception
+	 */
+	protected static String readchunk(BufferedReader in) throws Exception {
+		String data = null;
+		int len = -1;
+		while (len == -1) {
+			try {
+				data = in.readLine();
+				// System.out.println("Chunk size: " + data);
+				len = Integer.valueOf(data, 16);
+			} catch (NumberFormatException ex) {
 
-        len += 2; // For the CR & LF chars
-        char buf[] = new char[len];
-        int offset = 0;
-        int recv = 0;
-        while (recv != len) {
-            int i = in.read(buf, offset, len - offset);
-            recv += i;
-            offset = recv;
-        }
-        data = new String(buf);
-        //System.out.println("Received : " + recv);
-        //System.out.println("DATA -> " + data);
+				break;
+			} catch (Exception ex) {
+				System.err.println("Ex: " + ex.getMessage());
+			} finally {
+				if (len == 0) {
+					// System.out.println("End chunk");
+					throw new Exception("End chunk");
+				}
+			}
+		}
 
-        return data;
-    }
+		len += 2; // For the CR & LF chars
+		char buf[] = new char[len];
+		int offset = 0;
+		int recv = 0;
+		while (recv != len) {
+			int i = in.read(buf, offset, len - offset);
+			recv += i;
+			offset = recv;
+		}
+		data = new String(buf);
+		// System.out.println("Received : " + recv);
+		// System.out.println("DATA -> " + data);
 
-    /**
-     *
-     * @param in
-     * @return
-     */
-    protected static String getsess(String in) {
-        String data = null;
-        int start = in.indexOf('[');
-        if (start != -1) {
-            int end = in.indexOf(']');
-            if (end != -1) {
-                if (end > start) {
-                    data = in.substring(start + 1, end);
-                } else {
-                    start = in.indexOf('[', end);
-                    if (start != -1) {
-                        end = in.indexOf(']', start);
-                        if (end != -1) {
-                            data = in.substring(start + 1, end);
-                        }
-                    }
-                }
-            }
-        }
-        return data;
-    }
+		return data;
+	}
 
-    /**
-     *
-     * @param args
-     * @throws Exception
-     */
-    public static void main(String[] args) throws Exception {
-        if (args.length < 1) {
-            //System.err.println("Usage: java " + CometServletClientTest.class.getName()
-            //        + " URL [n] [max] [delay]");
-            System.err.println("Usage: java " + CometServletClientTest.class.getName()
-                    + " URL [n] [delay]");
-            System.err.println("\tURL: The url of the service to test.");
-            System.err.println("\tn: The number of threads. (default is " + NB_CLIENTS + ")");
-            // System.err.println("\tmax: The maximum number of requests. (default is 1000)");
-            System.err.println("\tdelay: The delay between requests. (default is 1000ms)");
-            System.exit(1);
-        }
+	/**
+	 * 
+	 * @param in
+	 * @return
+	 */
+	protected static String getsess(String in) {
+		String data = null;
+		int start = in.indexOf('[');
+		if (start != -1) {
+			int end = in.indexOf(']');
+			if (end != -1) {
+				if (end > start) {
+					data = in.substring(start + 1, end);
+				} else {
+					start = in.indexOf('[', end);
+					if (start != -1) {
+						end = in.indexOf(']', start);
+						if (end != -1) {
+							data = in.substring(start + 1, end);
+						}
+					}
+				}
+			}
+		}
+		return data;
+	}
 
-        URL strURL = new URL(args[0]);
-        int delay = DEFAULT_DELAY;
+	/**
+	 * 
+	 * @param args
+	 * @throws Exception
+	 */
+	public static void main(String[] args) throws Exception {
+		if (args.length < 1) {
+			System.err.println("Usage: java " + CometServletClientTest.class.getName()
+					+ " URL [n] [delay] [nReq] [nClients]");
+			System.err.println("\tURL: The url of the service to test.");
+			System.err.println("\tn: The number of threads. (default is " + NB_CLIENTS + ")");
+			// System.err.println("\tmax: The maximum number of requests. (default is 1000)");
+			System.err.println("\tdelay: The delay between requests. (default is " + DEFAULT_DELAY
+					+ "ms)");
+			System.err.println("\tnReq: The total number of requests. (default is " + DEFAULT_NREQ
+					+ ")");
+			System.err
+					.println("\tnClients: The total number of clients. (default is the number of clients)");
+			System.exit(1);
+		}
 
-        if (args.length > 1) {
-            try {
-                NB_CLIENTS = Integer.parseInt(args[1]);
-                //if (args.length > 2) {
-                //    max = Integer.parseInt(args[2]);
-                //    if (max < 1) {
-                //        throw new IllegalArgumentException("Negative number: max");
-                //    }
-                //}
-                if (args.length > 2) {
-                    delay = Integer.parseInt(args[2]);
-                    if (delay < 1) {
-                        throw new IllegalArgumentException("Negative number: delay");
-                    }
-                }
-            } catch (Exception exp) {
-                System.err.println("Error: " + exp.getMessage());
-                System.exit(1);
-            }
-        }
+		URL strURL = new URL(args[0]);
+		int delay = DEFAULT_DELAY, nReq = DEFAULT_NREQ, nClients;
 
-        System.out.println("\nRunning test with parameters:");
-        System.out.println("\tURL: " + strURL);
-        System.out.println("\tn: " + NB_CLIENTS);
-        //System.out.println("\tmax: " + max);
-        System.out.println("\tdelay: " + delay);
+		if (args.length > 1) {
+			try {
+				NB_CLIENTS = Integer.parseInt(args[1]);
 
-        Thread clients[] = new Thread[NB_CLIENTS];
-        for (int i = 0; i < clients.length; i++) {
-            clients[i] = new CometServletClientTest(strURL, delay);
-        }
-        for (int i = 0; i < clients.length; i++) {
-            clients[i].start();
-        }
-        for (int i = 0; i < clients.length; i++) {
-            clients[i].join();
-        }
-    }
+				if (args.length > 2) {
+					delay = Integer.parseInt(args[2]);
+					if (delay < 1) {
+						throw new IllegalArgumentException("Negative number: delay");
+					}
+				}
+
+				if (args.length > 3) {
+					nReq = Integer.parseInt(args[3]);
+					if (nReq < NB_CLIENTS) {
+						System.err
+								.println("ERROR: the total number of requests must be greater or equal to the number of clients");
+						System.err
+								.println("  --> adjusting the total number of requests to the number of clients");
+						nReq = NB_CLIENTS;
+					}
+				}
+
+				if (args.length > 4) {
+					nClients = Integer.parseInt(args[4]);
+					if (nClients < NB_CLIENTS) {
+						System.err
+								.println("ERROR: the total number of clients must be greater or equal to the number of clients");
+						System.err
+								.println("  --> adjusting the total number of clients to the number of clients");
+						nClients = NB_CLIENTS;
+					}
+				}
+			} catch (Exception exp) {
+				System.err.println("ERROR: " + exp.getMessage());
+				System.exit(1);
+			}
+		}
+
+		System.out.println("\nRunning test with parameters:");
+		System.out.println("\tURL: " + strURL);
+		System.out.println("\tn: " + NB_CLIENTS);
+		// System.out.println("\tmax: " + max);
+		System.out.println("\tdelay: " + delay);
+
+		Thread clients[] = new Thread[NB_CLIENTS];
+		for (int i = 0; i < clients.length; i++) {
+			clients[i] = new CometServletClientTest(strURL, delay);
+		}
+		for (int i = 0; i < clients.length; i++) {
+			clients[i].start();
+		}
+		for (int i = 0; i < clients.length; i++) {
+			clients[i].join();
+		}
+	}
 }
